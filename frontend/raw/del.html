@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FolderDisplay Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div id="breadcrumb" class="text-sm text-gray-600 mb-4"></div>
+
+<div id="folderSection" class="mb-6">
+    <div id="folders" class="space-y-2"></div>
+</div>
+
+<div id="fileSection">
+    <div id="files" class="space-y-2"></div>
+</div>
+
+<script>
+    const data = {
+        name: "root",
+        type: "folder",
+        created: "2023-01-01",
+        modified: "2023-03-01",
+        accessed: "2023-04-01",
+        size: "-",
+        permission: "drwxr-xr-x",
+        children: [
+            {
+                name: "documents",
+                type: "folder",
+                created: "2023-01-02",
+                modified: "2023-02-01",
+                accessed: "2023-04-01",
+                size: "-",
+                permission: "drwxr-xr-x",
+                children: [
+                    {
+                        name: "resume.pdf",
+                        type: "file",
+                        url: "/files/resume.pdf",
+                        created: "2023-01-05",
+                        modified: "2023-01-10",
+                        accessed: "2023-04-01",
+                        size: "150KB",
+                        permission: "-rw-r--r--",
+                    }
+                ]
+            },
+            {
+                name: "photo.jpg",
+                type: "file",
+                url: "/files/photo.jpg",
+                created: "2023-01-03",
+                modified: "2023-01-08",
+                accessed: "2023-04-01",
+                size: "2MB",
+                permission: "-rw-r--r--",
+            },
+            {
+                name: "photo.jpg",
+                type: "file",
+                url: "/files/photo.jpg",
+                created: "2023-01-03",
+                modified: "2023-01-08",
+                accessed: "2023-04-01",
+                size: "2MB",
+                permission: "-rw-r--r--",
+            }
+        ]
+    };
+
+    let currentPath = [];
+
+    function render(items, path) {
+        const breadcrumb = document.getElementById("breadcrumb");
+        const foldersDiv = document.getElementById("folders");
+        const filesDiv = document.getElementById("files");
+        console.log(path)
+        // Render breadcrumb
+        breadcrumb.innerHTML = path.map((p, idx) =>
+            `<span class="cursor-pointer hover:underline text-blue-600" onclick="navigateTo(${idx})">${p.name}</span>`
+        ).join(" / ");
+
+        foldersDiv.innerHTML = "";
+        filesDiv.innerHTML = "";
+
+        const folders = items.filter(i => i.type === "folder");
+        const files = items.filter(i => i.type === "file");
+
+        // Render folders
+        folders.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "flex justify-between items-center bg-yellow-50 hover:bg-yellow-100 shadow rounded-md p-4 transition cursor-pointer";
+
+            row.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="text-yellow-500">📁</span>
+            <div>
+              <div class="font-medium text-blue-600">${item.name}</div>
+              <div class="text-xs text-gray-500">FolderDisplay</div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-600 flex space-x-4 text-right">
+            <span>Created: ${item.created}</span>
+            <span>Modified: ${item.modified}</span>
+            <span>Accessed: ${item.accessed}</span>
+            <span>Size: ${item.size}</span>
+            <span>Perm: ${item.permission}</span>
+          </div>
+        `;
+
+            row.onclick = () => {
+                currentPath.push(item);
+                render(item.children || [], currentPath);
+            };
+
+            foldersDiv.appendChild(row);
+        });
+
+        // Render files
+        files.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "flex justify-between items-center bg-green-50 hover:bg-green-100 shadow rounded-md p-4 transition cursor-pointer";
+
+            row.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="text-green-500">📄</span>
+            <div>
+              <div class="font-medium text-gray-700">${item.name}</div>
+              <div class="text-xs text-gray-500">FileDisplay</div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-600 flex space-x-4 text-right">
+            <span>Created: ${item.created}</span>
+            <span>Modified: ${item.modified}</span>
+            <span>Accessed: ${item.accessed}</span>
+            <span>Size: ${item.size}</span>
+            <span>Perm: ${item.permission}</span>
+          </div>
+        `;
+
+            row.onclick = () => {
+                if (item.url) window.open(item.url, "_blank");
+            };
+
+            filesDiv.appendChild(row);
+        });
+    }
+
+    function navigateTo(index) {
+        currentPath = currentPath.slice(0, index + 1);
+        const folder = currentPath[currentPath.length - 1];
+        render(folder.children, currentPath);
+    }
+
+    currentPath = [data];
+    render(data.children, currentPath);
+</script>
+
+</body>
+</html>

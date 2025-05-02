@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Upload Files</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
+    <div class="bg-white w-[90%] max-w-[400px] h-auto p-6 rounded-lg shadow-lg relative flex flex-col items-center shadow-gray-800 shadow-xl border border-gray-200">
+        <a class="self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" data-discover="true" href="/portfolio/gallery/Qczmfcnf0T">X</a>
+
+        <div class="max-w-xl mx-auto bg-white shadow-md rounded-md p-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Upload Files</h2>
+
+            <!-- Drag and drop / file input -->
+            <label class="block border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition" for="fileInput">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 16V4m0 0L3.5 7.5M7 4l3.5 3.5M17 20v-8m0 0l-3.5 3.5M17 12l3.5 3.5" stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2"/>
+                </svg>
+                <p class="text-sm text-gray-600">Click to upload or drag files here</p>
+                <input class="hidden" id="fileInput" multiple type="file"/>
+            </label>
+
+            <!-- Selected files list -->
+            <ul class="mt-4 space-y-1 text-sm text-gray-700" id="fileList"></ul>
+
+            <!-- Submit button -->
+            <button class="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition" id="uploadBtn">
+                Upload
+            </button>
+
+            <!-- Upload status -->
+            <div class="mt-4 text-sm text-gray-600" id="uploadStatus"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const fileList = document.getElementById("fileList");
+
+    fileInput.addEventListener("change", () => {
+        fileList.innerHTML = ""; // Clear list
+        const files = fileInput.files;
+        if (files.length === 0) {
+            fileList.innerHTML = "<li class='text-gray-400 italic'>No files selected.</li>";
+            return;
+        }
+        Array.from(files).forEach(file => {
+            const li = document.createElement("li");
+            li.textContent = `📄 ${file.name}`;
+            fileList.appendChild(li);
+        });
+    });
+
+    uploadBtn.addEventListener("click", () => {
+        const files = fileInput.files;
+        if (files.length === 0) {
+            uploadStatus.textContent = "Please select at least one file.";
+            return;
+        }
+
+        uploadStatus.innerHTML = `<p class="text-blue-600">Uploading ${files.length} file(s)...</p>`;
+
+        // Simulated delay for upload
+        setTimeout(() => {
+            uploadStatus.innerHTML = `<p class="text-green-600">Upload successful!</p>`;
+        }, 1500);
+    });
+</script>
+
+</body>
+</html>
