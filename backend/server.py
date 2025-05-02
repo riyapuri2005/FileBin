@@ -6,17 +6,13 @@ from typing import List
 from fastapi import Form, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 all_files_relative = Path("./files/")
 all_files_absolute = all_files_relative.absolute()
 all_files_absolute.mkdir(parents=True, exist_ok=True)
 base_app = FastAPI()
-base_app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"],  # Or use ["*"] to allow all (not recommended in production)
-    allow_credentials=True, allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
-)
+
 
 
 def file_metadata(path: Path) -> Dict[str, Union[str, bool]]:

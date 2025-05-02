@@ -1,0 +1,14 @@
+[Unit]
+Description=FileBin FastAPI
+After=network.target
+
+[Service]
+User=filebin
+Group=filebin
+WorkingDirectory=/opt/filebin/backend
+ExecStart=/opt/filebin/backend/venv/bin/gunicorn -w 2 -k uvicorn.workers.UvicornWorker server:base_app --bind 0.0.0.0:10000
+Restart=always
+Environment="PATH=/opt/filebin/backend/venv/bin"
+
+[Install]
+WantedBy=multi-user.target
