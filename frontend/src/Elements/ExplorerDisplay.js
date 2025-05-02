@@ -1,3 +1,4 @@
+import React from "react"
 import {FolderDisplay} from "./FolderDisplay"
 import {FileDisplay} from "./FileDisplay"
 import {useNavigate, useParams} from "react-router-dom";
@@ -11,7 +12,7 @@ export const ExplorerDisplay = () => {
     const {'*': wildcardPath} = useParams();
     const navigate = useNavigate();
 
-    const [showFileUpload, setShowFileUpload] = useState(true);
+    const [showFileUpload, setShowFileUpload] = useState(false);
     const [showFolderCreate, setShowFolderCreate] = useState(false);
 
     const [structure, setStructure] = useState([]);
@@ -19,8 +20,7 @@ export const ExplorerDisplay = () => {
 
 
     const fetchStructure = async () => {
-        await axios
-            .get(`http://localhost/api/all-files`)
+        await axios.get(`/api/all-files`)
             .then(response => {
                 setStructure(response.data);
             })
@@ -36,11 +36,9 @@ export const ExplorerDisplay = () => {
         if (!structure || structure.length === 0) return;
 
         const urlSegments = wildcardPath ? wildcardPath.split('/') : [];
-        console.log("urlSegments", urlSegments);
         let current = structure;
 
         for (let segment of urlSegments) {
-            console.log("segment", segment)
             current = current.children.find(item => item.name === segment);
             if (!current) {
                 console.error('Path not found');
@@ -48,11 +46,10 @@ export const ExplorerDisplay = () => {
                 return;
             } else {
                 if (current.is_file) {
-                    window.location.href = `http://localhost/api/download/${current.path}`;
+                    window.location.href = `/api/download/${current.path}`;
                     navigate("/" + current.parent);
                 } else {
                     setCurrentNode(current);
-                    console.log("currentNode", current);
                 }
             }
         }
@@ -66,10 +63,25 @@ export const ExplorerDisplay = () => {
     return (<div>
         {showFileUpload && <FileUpload closePopup={() => setShowFileUpload(false)} fetchStructure={fetchStructure} location={wildcardPath}/>}
         {showFolderCreate && <FolderCreate closePopup={() => setShowFolderCreate(false)} fetchStructure={fetchStructure} location={wildcardPath}/>}
+        <div id="breadcrumb" className="text-sm text-gray-600 mb-4">
+    <span key={-1} onClick={() => navigate(`/`)} className="cursor-pointer">
+        Home
+    </span>
+            {wildcardPath ? wildcardPath.split('/').map((segment, index) => (<React.Fragment key={index}>
+                    {' > '}
+                    <span
+                        onClick={() => navigate(`/${wildcardPath.split('/').slice(0, index + 1).join('/')}`)}
+                        className="cursor-pointer"
+                    >
+                {segment}
+            </span>
+                </React.Fragment>)) : null}
+        </div>
+
 
         <div className="w-full flex justify-end mb-4 space-x-2">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create Folder</button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => setShowFileUpload(true)}>Upload File</button>
+            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" onClick={() => setShowFolderCreate(true)}>Create Folder</button>
         </div>
 
         <div id="folderSection" className="mb-6">

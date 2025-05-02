@@ -1,36 +1,102 @@
-## System updates ##
+#!/bin/bash
+
+CLONE_DIR="/opt/filebin"
+NGINX_CONF_PATH="/etc/nginx/nginx.conf"
+SYSTEMD_SERVICE_PATH="/etc/systemd/system/filebin.service"
+
+echo "Updating and upgrading system..."
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+echo "Installing required packages..."
+sudo apt-get install -y nginx python3-pip python3-venv ufw
 
-## Setup UFW ##
-sudo apt-get install ufw -y
+echo "Configuring UFW firewall..."
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
+sudo ufw allow 22      # SSH
+sudo ufw allow 80      # HTTP
 sudo ufw enable
 sudo ufw reload
 
+echo "Creating nginx.conf"
+sudo tee $NGINX_CONF_PATH > /dev/null <<EOL
+server {
+    listen 80;
+    server_name _;
 
-## NGINX ##
-sudo apt-get install nginx -y
-######### write changes to nginx.conf
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer-when-downgrade;
 
+    add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+    add_header Access-Control-Allow-Headers "Content-Type, X-Requested-With, Accept";
 
+    # API proxy configuration
+    location /api {
+        proxy_pass http://127.0.0.1:80;
+        proxy_http_version 1.1;
 
-## Git Clone backend
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
 
+        proxy_buffering on;
+        proxy_redirect off;
 
+        if ($is_valid_request = 0) {
+            return 403;
+        }
+        if ($request_method = OPTIONS) {
+            add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            return 204;
+        }
+    }
 
+    # Serve frontend files from /frontend/build
+    location / {
+        root $CLONE_DIR/frontend/build;
+        index index.html;
 
+        try_files \$uri \$uri/ /index.html;
+    }
+}
+EOL
 
+echo "Setting up Python environment..."
+cd $CLONE_DIR/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 
-systemctl daemon-reload
+echo "Creating systemd service..."
+sudo tee $SYSTEMD_SERVICE_PATH > /dev/null <<EOL
+[Unit]
+Description=FastAPI App using Gunicorn and Uvicorn
+After=network.target
 
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=$CLONE_DIR/backend
+ExecStart=$CLONE_DIR/backend/venv/bin/gunicorn -w 2 -k uvicorn.workers.UvicornWorker server:base_app
+Restart=always
+Environment="PATH=$CLONE_DIR/backend/venv/bin"
 
+[Install]
+WantedBy=multi-user.target
+EOL
 
+echo "Enabling and starting the service..."
+sudo systemctl daemon-reload
+sudo systemctl enable filebin.service
+sudo systemctl start filebin.service
 
-
+echo "Restarting NGINX..."
+sudo systemctl restart nginx

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FolderDisplay Viewer</title>
+    <title>Folder Viewer</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -83,8 +83,7 @@
         const breadcrumb = document.getElementById("breadcrumb");
         const foldersDiv = document.getElementById("folders");
         const filesDiv = document.getElementById("files");
-        console.log(path)
-        // Render breadcrumb
+
         breadcrumb.innerHTML = path.map((p, idx) =>
             `<span class="cursor-pointer hover:underline text-blue-600" onclick="navigateTo(${idx})">${p.name}</span>`
         ).join(" / ");
@@ -105,7 +104,7 @@
             <span class="text-yellow-500">📁</span>
             <div>
               <div class="font-medium text-blue-600">${item.name}</div>
-              <div class="text-xs text-gray-500">FolderDisplay</div>
+              <div class="text-xs text-gray-500">Folder</div>
             </div>
           </div>
           <div class="text-xs text-gray-600 flex space-x-4 text-right">

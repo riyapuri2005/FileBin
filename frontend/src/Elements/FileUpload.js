@@ -2,7 +2,6 @@ import {useState} from "react";
 import axios from "axios";
 
 export const FileUpload = ({closePopup, fetchStructure, location}) => {
-    console.log("create location", location);
     const [successNotification, setSuccessNotification] = useState("");
     const [failureNotification, setFailureNotification] = useState("");
     const [failedFiles, setFailedFiles] = useState([]);
@@ -20,17 +19,18 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
             formData.append("uploaded_files", file);
         });
 
-        axios.post('http://localhost/api/upload', formData)
+        axios.post('/api/upload', formData)
             .then(async response => {
                 const data = response.data;
                 if (data.length === 0) {
                     setSuccessNotification("All files uploaded successfully");
+                    await fetchStructure()
                     closePopup()
                 } else {
                     setFailureNotification("Some files failed to upload");
+                    await fetchStructure()
                     setFailedFiles(data);
                 }
-                await fetchStructure()
             })
             .catch(error => {
                 console.error(error);
@@ -56,7 +56,7 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
                               strokeWidth="2"/>
                     </svg>
                     <p className="text-sm text-gray-600">Click to upload or drag files here</p>
-                    <input className="hidden" id="fileInput" multiple type="file"
+                    <input className="hidden" id="fileInput" multiple type="file" required
                            onChange={(e) => setFiles(Array.from(e.target.files))}
                     />
                 </label>

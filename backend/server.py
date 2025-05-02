@@ -56,7 +56,6 @@ async def _download_single_file(file_path: str):
 @base_app.post("/api/upload")
 async def _upload_multiple_files(location: str = Form(...), uploaded_files: List[UploadFile] = File(...)):
     folder_path = all_files_absolute.resolve() / location
-    print(folder_path)
     notifications = []
     for uploaded_file in uploaded_files:
         file_path = (folder_path / uploaded_file.filename)
@@ -71,18 +70,14 @@ async def _upload_multiple_files(location: str = Form(...), uploaded_files: List
 ## Create a folder
 @base_app.post("/api/create-folder")
 async def _create_single_folder(location: str = Form(...), folder_name: str = Form(...)):
-    parent_path = Path(location)
-    folder_path = (parent_path / folder_name)
-    if not folder_path.is_relative_to(all_files_absolute):
-        return JSONResponse({"allowed": False, "notification": "Location not allowed"})
-    elif folder_path.exists():
-        return JSONResponse({"allowed": False, "notification": "FolderDisplay already exists"})
+    folder_path = all_files_absolute.resolve() / location / folder_name
+    if folder_path.exists():
+        return JSONResponse({"allowed": False, "notification": "Folder already exists"})
     else:
         folder_path.mkdir()
-        return JSONResponse({"allowed": True, "notification": "FolderDisplay created successfully"})
+        return JSONResponse({"allowed": True, "notification": "Folder created successfully"})
 
 
 if __name__ == "__main__":
     from uvicorn import run
-
     run("server:base_app", host="0.0.0.0", port=80)
