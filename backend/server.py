@@ -14,7 +14,6 @@ all_files_absolute.mkdir(parents=True, exist_ok=True)
 base_app = FastAPI()
 
 
-
 def file_metadata(path: Path) -> Dict[str, Union[str, bool]]:
     stat = path.stat()
     return {"name": path.name, "path": path.relative_to(all_files_relative).as_posix(), "parent": path.relative_to(all_files_relative).parent.as_posix(), "created": stat.st_ctime, "modified": stat.st_mtime, "accessed": stat.st_atime, "size": stat.st_size, "permission": filemode(stat.st_mode), "is_file": path.is_file(), "is_dir": path.is_dir(), }
