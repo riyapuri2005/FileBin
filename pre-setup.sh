@@ -15,5 +15,5 @@ sudo git clone $REPO_URL $CLONE_DIR
 
 echo "Fetching rest scripts"
 cd $CLONE_DIR
-chmod +x setup.sh
-./setup.sh
+sudo chmod +x setup.sh
+sudo ./setup.sh

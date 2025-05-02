@@ -21,49 +21,84 @@ sudo ufw reload
 
 echo "Creating nginx.conf"
 sudo tee $NGINX_CONF_PATH > /dev/null <<EOL
-server {
-    listen 80;
-    server_name _;
+user filebin-server;
+worker_processes 2;
+worker_rlimit_nofile 2048;
 
-    add_header X-Frame-Options SAMEORIGIN always;
-    add_header X-Content-Type-Options nosniff always;
-    add_header Referrer-Policy no-referrer-when-downgrade;
 
-    add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS";
-    add_header Access-Control-Allow-Headers "Content-Type, X-Requested-With, Accept";
+events {
+    use epoll;
+    worker_connections 25000;
+    multi_accept on;
+}
 
-    # API proxy configuration
-    location /api {
-        proxy_pass http://127.0.0.1:80;
-        proxy_http_version 1.1;
 
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+http {
+    default_type application/octet-stream;
 
-        proxy_read_timeout 300s;
-        proxy_send_timeout 300s;
+    keepalive_timeout 300;
+    keepalive_requests 1000;
 
-        proxy_buffering on;
-        proxy_redirect off;
+    server_tokens off;
 
-        if ($is_valid_request = 0) {
-            return 403;
+    aio threads;
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+
+    client_body_buffer_size 128k;
+    large_client_header_buffers 4 16k;
+    client_max_body_size 1G;
+
+    reset_timedout_connection on;
+
+    gzip off;
+
+    include /etc/nginx/mime.types;
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+
+    server {
+        listen 80;
+        server_name _;
+
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer-when-downgrade;
+
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Content-Type, X-Requested-With, Accept";
+
+
+        location /api {
+            proxy_pass http://127.0.0.1:80;
+            proxy_http_version 1.1;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            proxy_read_timeout 300s;
+            proxy_send_timeout 300s;
+
+            proxy_buffering on;
+            proxy_redirect off;
+
+            if ($is_valid_request = 0) {
+                return 403;
+            }
+            if ($request_method = OPTIONS) {
+                add_header Content-Length 0;
+                add_header Content-Type text/plain;
+                return 204;
+            }
         }
-        if ($request_method = OPTIONS) {
-            add_header Content-Length 0;
-            add_header Content-Type text/plain;
-            return 204;
+
+        location / {
+            root /;
+            index index.html;
         }
-    }
-
-    # Serve frontend files from /frontend/build
-    location / {
-        root $CLONE_DIR/frontend/build;
-        index index.html;
-
-        try_files \$uri \$uri/ /index.html;
     }
 }
 EOL
