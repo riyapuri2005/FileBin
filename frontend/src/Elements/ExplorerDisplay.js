@@ -67,6 +67,11 @@ export const ExplorerDisplay = () => {
         {showFileUpload && <FileUpload closePopup={() => setShowFileUpload(false)} fetchStructure={fetchStructure} location={wildcardPath}/>}
         {showFolderCreate && <FolderCreate closePopup={() => setShowFolderCreate(false)} fetchStructure={fetchStructure} location={wildcardPath}/>}
 
+        <div className="w-full flex justify-end mb-4 space-x-2">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
+            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create Folder</button>
+        </div>
+
         <div id="folderSection" className="mb-6">
             <div id="folders" className="space-y-2">
                 {currentNode?.children
