@@ -21,14 +21,12 @@ sudo ufw reload
 
 echo "Creating nginx.conf"
 sudo tee $NGINX_CONF_PATH > /dev/null <<EOL
-user filebin-server;
+user filebin;
 worker_processes 2;
-worker_rlimit_nofile 2048;
 
 
 events {
-    use epoll;
-    worker_connections 25000;
+    worker_connections 1000;
     multi_accept on;
 }
 
@@ -41,18 +39,13 @@ http {
 
     server_tokens off;
 
-    aio threads;
     sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
 
     client_body_buffer_size 128k;
     large_client_header_buffers 4 16k;
-    client_max_body_size 1G;
+    client_max_body_size 512m;
 
     reset_timedout_connection on;
-
-    gzip off;
 
     include /etc/nginx/mime.types;
 	include /etc/nginx/conf.d/*.conf;
@@ -71,7 +64,7 @@ http {
 
 
         location /api {
-            proxy_pass http://127.0.0.1:80;
+            proxy_pass http://127.0.0.1:10000;
             proxy_http_version 1.1;
 
             proxy_set_header Host $host;
@@ -85,9 +78,6 @@ http {
             proxy_buffering on;
             proxy_redirect off;
 
-            if ($is_valid_request = 0) {
-                return 403;
-            }
             if ($request_method = OPTIONS) {
                 add_header Content-Length 0;
                 add_header Content-Type text/plain;
@@ -120,7 +110,7 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=$CLONE_DIR/backend
-ExecStart=$CLONE_DIR/backend/venv/bin/gunicorn -w 2 -k uvicorn.workers.UvicornWorker server:base_app
+ExecStart=$CLONE_DIR/backend/venv/bin/gunicorn -w 2 -k uvicorn.workers.UvicornWorker server:base_app --bind 0.0.0.0:10000
 Restart=always
 Environment="PATH=$CLONE_DIR/backend/venv/bin"
 

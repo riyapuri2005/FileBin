@@ -77,7 +77,3 @@ async def _create_single_folder(location: str = Form(...), folder_name: str = Fo
         folder_path.mkdir()
         return JSONResponse({"allowed": True, "notification": "Folder created successfully"})
 
-
-if __name__ == "__main__":
-    from uvicorn import run
-    run("server:base_app", host="0.0.0.0", port=80)
