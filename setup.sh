@@ -22,7 +22,8 @@ echo "Creating nginx.conf"
 sudo tee "$NGINX_CONF_PATH" > /dev/null < /opt/filebin/other/nginx.conf
 
 echo "Setting up Python environment..."
-python3 -m venv venv
+sudo python3 -m venv /opt/filebin/backend/venv
+
 sudo /opt/filebin/backend/venv/bin/pip install --upgrade pip
 sudo /opt/filebin/backend/venv/bin/pip install -r requirements.txt
 
