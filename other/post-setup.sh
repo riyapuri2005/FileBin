@@ -25,7 +25,7 @@ echo "Setting up Python environment..."
 sudo python3 -m venv /opt/filebin/backend/venv
 
 sudo /opt/filebin/backend/venv/bin/pip install --upgrade pip
-sudo /opt/filebin/backend/venv/bin/pip install -r requirements.txt
+sudo /opt/filebin/backend/venv/bin/pip install -r /opt/filebin/backend/requirements.txt
 
 echo "Creating systemd service..."
 sudo tee "$SYSTEMD_SERVICE_PATH" > /dev/null < /opt/filebin/other/filebin.service
