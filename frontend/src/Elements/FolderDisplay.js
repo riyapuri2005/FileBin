@@ -22,7 +22,7 @@ export const FolderDisplay = ({ item }) => {
                     <div className="font-medium text-gray-700">{item.name}</div>
                 </div>
             </div>
-            <div className="text-xs text-gray-600 flex space-x-4 text-right">
+            <div className="text-xs text-gray-600 flex items-center space-x-4 text-right">
                 <span>Created: {new Date(item.created*1000).toLocaleString()}</span>
                 <span>Modified: {new Date(item.created*1000).toLocaleString()}</span>
                 <span>Accessed: {new Date(item.created*1000).toLocaleString()}</span>
