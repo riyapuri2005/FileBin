@@ -8,6 +8,7 @@ echo "Installing required packages..."
 sudo apt-get install -y git
 
 echo "Cloning the repository..."
+sudo rm -r /opt/filebin
 sudo git clone https://github.com/riyapuri2005/FileBin.git /opt/filebin
 
 echo "Fetching other scripts"
