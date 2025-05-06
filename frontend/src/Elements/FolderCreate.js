@@ -33,8 +33,7 @@ export const FolderCreate = ({closePopup, fetchStructure, location}) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
             <div className="bg-white w-[90%] max-w-[400px] h-auto p-6 rounded-lg shadow-lg relative flex flex-col items-center shadow-gray-800 shadow-xl border border-gray-200">
-                <div className="self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" onClick={closePopup}>X</div>
-
+                <div className="cursor-pointer self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" onClick={closePopup}>X</div>
                 <div className="w-full">
                     <p className="green text-sm text-center mb-2">{successNotification}</p>
                     <p className="text-red-500 text-sm text-center mb-2">{failureNotification}</p>

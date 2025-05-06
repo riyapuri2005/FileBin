@@ -6,8 +6,10 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
     const [failureNotification, setFailureNotification] = useState("");
     const [failedFiles, setFailedFiles] = useState([]);
     const [files, setFiles] = useState([]);
+    const [progress, setProgress] = useState(0);
 
     function handleUpload() {
+        setProgress(0);
         setSuccessNotification("");
         setFailureNotification("");
         setFailedFiles([]);
@@ -19,8 +21,14 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
             formData.append("uploaded_files", file);
         });
 
-        axios.post('/api/upload', formData)
+        axios.post('/api/upload', formData, {
+            onUploadProgress: (progressEvent) => {
+                const uploadPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setProgress(uploadPercent);
+            }
+        })
             .then(async response => {
+                setProgress(0);
                 const data = response.data;
                 if (data.length === 0) {
                     setSuccessNotification("All files uploaded successfully");
@@ -33,16 +41,22 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
                 }
             })
             .catch(error => {
+                setProgress(0);
                 console.error(error);
             });
-
         setFiles([]);
     }
 
 
     return (<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
         <div className="bg-white w-[90%] max-w-[400px] h-auto p-6 rounded-lg shadow-lg relative flex flex-col items-center shadow-gray-800 shadow-xl border border-gray-200">
-            <div className="self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" data-discover="true" onClick={closePopup}>X</div>
+            <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-t-lg overflow-hidden">
+                <div id="uploadProgressBar" className="h-full bg-blue-500 transition-all duration-300 ease-linear" style="width: 0%;"></div>
+            </div>
+            <div className="cursor-pointer self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" data-discover="true" onClick={() => {
+                if (progress===0) closePopup()
+            }}>X
+            </div>
 
             <div className="max-w-xl mx-auto bg-white shadow-md rounded-md p-6">
                 <p className="green text-sm text-center mb-2">{successNotification}</p>
