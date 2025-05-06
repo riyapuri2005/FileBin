@@ -27,6 +27,10 @@ sudo python3 -m venv /opt/filebin/backend/venv
 sudo /opt/filebin/backend/venv/bin/pip install --upgrade pip
 sudo /opt/filebin/backend/venv/bin/pip install -r /opt/filebin/backend/requirements.txt
 
+echo "Shutting down old services..."
+sudo systemctl stop filebin.service
+sudo systemctl stop nginx
+
 echo "Creating systemd service..."
 sudo tee "$SYSTEMD_SERVICE_PATH" > /dev/null < /opt/filebin/other/filebin.service
 
@@ -36,4 +40,4 @@ sudo systemctl enable filebin.service
 sudo systemctl start filebin.service
 
 echo "Restarting NGINX..."
-sudo systemctl restart nginx
+sudo systemctl start nginx

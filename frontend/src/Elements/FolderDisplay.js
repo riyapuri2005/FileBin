@@ -32,9 +32,9 @@ export const FolderDisplay = ({ item }) => {
                         e.stopPropagation();
                         handleCopy();
                     }}
-                    className="ml-2 px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-600 text-sm transition"
+                    className="ml-2 px-2 py-1 bg-transparent cursor-pointer rounded text-graye-700 font-bold text-sm transition"
                 >
-                    {copied ? "✅ Copied!" : "🔗 Share"}
+                    {copied ? "Copied!" : "🔗 Share"}
                 </button>
             </div>
         </div>
