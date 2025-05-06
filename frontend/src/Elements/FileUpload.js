@@ -19,12 +19,11 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
 
         Object.values(files).forEach(file => {
             formData.append("uploaded_files", file);
-        });
+        })
 
         axios.post('/api/upload', formData, {
             onUploadProgress: (progressEvent) => {
-                const uploadPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                setProgress(uploadPercent);
+                setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
             }
         })
             .then(async response => {
@@ -51,7 +50,11 @@ export const FileUpload = ({closePopup, fetchStructure, location}) => {
     return (<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20">
         <div className="bg-white w-[90%] max-w-[400px] h-auto p-6 rounded-lg shadow-lg relative flex flex-col items-center shadow-gray-800 shadow-xl border border-gray-200">
             <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-t-lg overflow-hidden">
-                <div id="uploadProgressBar" className="h-full bg-blue-500 transition-all duration-300 ease-linear" style="width: 0%;"></div>
+                <div
+                    id="uploadProgressBar"
+                    className="h-full bg-blue-500 transition-all duration-300 ease-linear"
+                    style={{ width: `${progress}%` }}
+                ></div>
             </div>
             <div className="cursor-pointer self-end mb-4 bg-gray-200 text-gray-500 font-bold border border-gray-500 px-3 py-1 rounded-lg" data-discover="true" onClick={() => {
                 if (progress===0) closePopup()
